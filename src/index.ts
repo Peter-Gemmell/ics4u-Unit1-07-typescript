@@ -6,82 +6,74 @@
  * Since: 2023-01-1
  */
 
-// get arguments
-import { readFileSync } from 'fs'
+// Imports
 import { writeFileSync } from 'fs'
+import { readFileSync } from 'fs'
 
-/**
- *
- * @param {number} gaussian mark range within the caluclation system
- * @param {number} dev standard deviation in the marking system
- * @returns {number} the mean of the numbers
- */
-function gaussianEquation(gaussian: number, dev: number): number {
-  // these are my constants and variables
-  const temp1 = 1 - Math.random()
-  const temp2 = Math.random()
-  const calc =
-    Math.sqrt(-2.0 * Math.log(temp1)) * Math.cos(2.0 * Math.PI * temp2)
-  return calc * dev + gaussian
+function generateGaussian(mean: number, std: number) {
+  // https://discourse.psychopy.org/t/javascript-gaussian-function/17724/2
+  let _2PI = Math.PI * 2
+  let u1 = Math.random()
+  let u2 = Math.random()
+
+  let z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(_2PI * u2)
+
+  return z0 * std + mean
 }
 
-/**
- * The table
- *
- * @param {string} students the people in the table
- * @param {string} assignments the units and work in the tabl
- */
-function csvTable(students: String[], assignments: String[]): void {
-  // these are my constants and variables
-  const worklength = assignments.length - 1
+function makeArray(d1: number, d2: number) {
+  // https://stackoverflow.com/questions/13808325/creating-a-2d-array-with-specific-length-and-width
+  let arr = []
+  for (let i = 0; i < d2; i++) {
+    arr.push(new Array(d1))
+  }
+  return arr
+}
 
-  // this creates the table, and pushes all of the
-  // information into the array
-  const table = []
-  table.push(assignments)
+// Function that grades and creates array
+function grader(assArr: string[], namesArr: string[]) {
+  // Defining array
+  const arr: string[][] = makeArray(namesArr.length + 1, arrAss.length)
 
-  // creates the array of the student
-  // that is in the students.txt file
-  for (let total = 0; total < students.length; total++) {
-    const arrayStud = []
-    arrayStud.push(students[total])
+  // Adding student names
+  arr[0] = arrNames
+  arr[0].unshift('')
 
-    // creates the marks for each students that
-    // are in the student.txt file
-    for (let unit = 0; unit < worklength; unit++) {
-      arrayStud.push(Math.round(gaussianEquation(75, 10)))
+  // Adding assignments and grades
+  for (let y = 1; y <= assArr.length - 1; y++) {
+    arr[y][0] = arrAss[y]
+    for (let x = 1; x <= namesArr.length - 1; x++) {
+      arr[y][x] = Math.round(generateGaussian(75, 10)).toString()
     }
-
-    // pushes all the table values  into the array
-    table.push(arrayStud)
   }
 
-  // data text
-  // https://stackoverflow.com/questions/14964035/how-to-export-javascript-array-info-to-csv-on-client-side
-  // let csvContent = 'data:text/csv;charset=utf-8,'
-
-  // this creates the CSV table
-  const tableDone = table.join(',\n')
-  writeFileSync('table.csv', tableDone)
+  // Return array
+  return arr
 }
 
-// this is the file path used to get the sets
-const studentFile = readFileSync('names1.txt', 'utf-8')
-const studList = studentFile.split(/\r?\n/)
-studList.pop()
+// Read files
+const namesFile = readFileSync('./names3.txt', 'utf-8')
+const assFile = readFileSync('./units3.txt', 'utf-8')
 
-// this reads in the file, and splits it to make
-// the table look nice, with a nice utf-8 font
-const workFile = readFileSync('units1.txt', 'utf-8')
-const workF = workFile.split(/\r?\n/)
-workF.pop()
+// Convert files to arr
+const arrNames = namesFile.toString().replace(/\r\n/g, '\n').split('\n')
+arrNames.pop()
+const arrAss = assFile.toString().replace(/\r\n/g, '\n').split('\n')
+arrAss.pop()
 
-// this organizes the table
-csvTable(studList, workF)
+// Call function
+const returned: string[][] = grader(arrAss, arrNames)
 
-// this reads and outputs the file
-const csv = readFileSync('table.csv', 'utf-8')
-console.log()
-console.log(csv)
+// Export string
+let exportString: string = ''
 
-console.log('\nDone!')
+for (let y = 0; y < returned.length; y++) {
+  for (let x = 0; x < returned[0].length; x++) {
+    exportString += returned[y][x]
+    exportString += ','
+  }
+  exportString += '\n'
+}
+
+// Spit out to file
+writeFileSync('table3.csv', exportString)
