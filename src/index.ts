@@ -51,8 +51,8 @@ function grader(assArr: string[], namesArr: string[]) {
 }
 
 // Read files
-const namesFile = readFileSync('./names1.txt', 'utf-8')
-const assFile = readFileSync('./units1.txt', 'utf-8')
+const namesFile = readFileSync('./names3.txt', 'utf-8')
+const assFile = readFileSync('./units3.txt', 'utf-8')
 
 // Convert files to arr
 const arrNames = namesFile.toString().replace(/\r\n/g, '\n').split('\n')
@@ -75,4 +75,4 @@ for (let y = 0; y < returned.length; y++) {
 }
 
 // Spit out to file
-writeFileSync('table.csv', exportString)
+writeFileSync('table3.csv', exportString)
